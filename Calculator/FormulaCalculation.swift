@@ -35,6 +35,10 @@ class FormulaCalculation {
             return "Your gift: 💊"
         }
         
+        // rock wrong
+        if formulaString == "()" || formulaString == "*" || formulaString == "/" {
+            return "Error"
+        }
         // calculating
         let answer = RPNCalculating(formulaString)
         
@@ -46,10 +50,10 @@ class FormulaCalculation {
         let RPNString = RPNGeneration(formulaString)
         var numberStack = [Double]()
         
-        println("RPNString Count: \(RPNString.count)")
-        if RPNString.count == 0 {
-            return "Error"
-        }
+//        println("RPNString Count: \(RPNString.count)")
+//        if RPNString.count == 0 {
+//            return "Error"
+//        }
         for string in RPNString {
             switch string {
                 case "+":
@@ -140,7 +144,7 @@ class FormulaCalculation {
                     operatorStack = RemoveOneInStack(operatorStack) // 删除"("
                 case "*", "/":
                     if !operatorStack.isEmpty {
-                        while operatorStack[operatorStack.count-1] == "*" || operatorStack[operatorStack.count-1] == "/" {
+                        while operatorStack[operatorStack.count-1] != "(" && (operatorStack[operatorStack.count-1] == "*" || operatorStack[operatorStack.count-1] == "/") {
                             calculatingStack += LastOneInStack(operatorStack)
                             operatorStack = RemoveOneInStack(operatorStack)
                             if operatorStack.isEmpty {
@@ -153,7 +157,19 @@ class FormulaCalculation {
                         operatorStack += [originStack[originIndex]]
                     }
                 case "+", "-":
-                    operatorStack += [originStack[originIndex]]
+                    if !operatorStack.isEmpty {
+                        while operatorStack[operatorStack.count-1] != "("  {
+                            calculatingStack += LastOneInStack(operatorStack)
+                            operatorStack = RemoveOneInStack(operatorStack)
+                            if operatorStack.isEmpty {
+                                break
+                            }
+                        }
+                        operatorStack += [originStack[originIndex]]
+                    }
+                    else {
+                        operatorStack += [originStack[originIndex]]
+                    }
                 default:
                     calculatingStack += [originStack[originIndex]]
             }
