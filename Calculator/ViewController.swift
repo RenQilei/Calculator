@@ -69,7 +69,7 @@ class ViewController: UIViewController {
             formulaString = CorrectBracket(formulaString)
             println(formulaString)
         
-            // 处理乘法省略"*"问题
+            // 处理乘法省略"×"问题
             formulaString = AddMultiple(formulaString)
             println(formulaString)
         
@@ -146,7 +146,7 @@ class ViewController: UIViewController {
             if (lastCharacter == "(") && (currentOperator == "+" || currentOperator == "-") {
                     return currentFormulaString + "0" + currentOperator
             }
-            else if lastCharacter == "+" || lastCharacter == "-" || lastCharacter == "*" || lastCharacter == "/" {
+            else if lastCharacter == "+" || lastCharacter == "-" || lastCharacter == "×" || lastCharacter == "÷" {
                 return currentFormulaString
             }
         }
@@ -190,7 +190,7 @@ class ViewController: UIViewController {
                 if LastCharacter(correctFormulaString) == ")" {
                     switch character {
                         case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "(":
-                            correctFormulaString = correctFormulaString + "*" + String(character)
+                            correctFormulaString = correctFormulaString + "×" + String(character)
                         default:
                             correctFormulaString += String(character)
                     }
@@ -199,7 +199,7 @@ class ViewController: UIViewController {
                     if character == "(" {
                         switch LastCharacter(correctFormulaString) {
                             case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
-                                correctFormulaString = correctFormulaString + "*" + String(character)
+                                correctFormulaString = correctFormulaString + "×" + String(character)
                             default:
                                 correctFormulaString += String(character)
                         }
@@ -223,7 +223,7 @@ class ViewController: UIViewController {
             }
             else {
                 switch character {
-                    case "(", ")", "+", "-", "*", "/":
+                    case "(", ")", "+", "-", "×", "÷":
                         if LastCharacter(correctFormulaString) == "." {
                             correctFormulaString = correctFormulaString + "0" + String(character)
                         }
@@ -274,7 +274,7 @@ class ViewController: UIViewController {
             switch currentFormulaString[advance(currentFormulaString.startIndex, i)] {
                 case ".":
                     demicalAmount++
-                case "+", "-", "*", "/", "(", ")":
+                case "+", "-", "×", "÷", "(", ")":
                     if demicalAmount==1 {
                         return true
                     }

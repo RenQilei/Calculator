@@ -36,7 +36,7 @@ class FormulaCalculation {
         }
         
         // rock wrong
-        if formulaString == "()" || formulaString == "*" || formulaString == "/" {
+        if formulaString == "()" || formulaString == "×" || formulaString == "÷" {
             return "Error"
         }
         // calculating
@@ -76,7 +76,7 @@ class FormulaCalculation {
                     else {
                         return "Error"
                     }
-                case "*":
+                case "×":
                     if numberStack.count >= 2 {
                         let temp = numberStack[numberStack.count-2] * numberStack[numberStack.count-1]
                         numberStack.removeAtIndex(numberStack.count-1)
@@ -86,7 +86,7 @@ class FormulaCalculation {
                     else {
                         return "Error"
                     }
-                case "/":
+                case "÷":
                     if numberStack.count >= 2 {
                         let temp = numberStack[numberStack.count-2] / numberStack[numberStack.count-1]
                         numberStack.removeAtIndex(numberStack.count-1)
@@ -114,7 +114,7 @@ class FormulaCalculation {
         // start: 将formulaString转换为符号，数字单独存放的String数组
         for character in formulaString {
             switch character {
-                case "(", ")", "+", "-", "*", "/":
+                case "(", ")", "+", "-", "×", "÷":
                     if temp != "" {
                         originStack += [temp]
                     }
@@ -142,9 +142,9 @@ class FormulaCalculation {
                         operatorStack = RemoveOneInStack(operatorStack)
                     }
                     operatorStack = RemoveOneInStack(operatorStack) // 删除"("
-                case "*", "/":
+                case "×", "÷":
                     if !operatorStack.isEmpty {
-                        while operatorStack[operatorStack.count-1] != "(" && (operatorStack[operatorStack.count-1] == "*" || operatorStack[operatorStack.count-1] == "/") {
+                        while operatorStack[operatorStack.count-1] != "(" && (operatorStack[operatorStack.count-1] == "×" || operatorStack[operatorStack.count-1] == "÷") {
                             calculatingStack += LastOneInStack(operatorStack)
                             operatorStack = RemoveOneInStack(operatorStack)
                             if operatorStack.isEmpty {
