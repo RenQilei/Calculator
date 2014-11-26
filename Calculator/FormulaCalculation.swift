@@ -36,7 +36,7 @@ class FormulaCalculation {
         }
         
         // rock wrong
-        if formulaString == "()" || formulaString == "×" || formulaString == "÷" {
+        if !isNumberExisted(formulaString) {
             return "Error"
         }
         // calculating
@@ -112,16 +112,28 @@ class FormulaCalculation {
         var temp = "" // 临时存储
         
         // start: 将formulaString转换为符号，数字单独存放的String数组
-        for character in formulaString {
-            switch character {
-                case "(", ")", "+", "-", "×", "÷":
+        for var i=0; i<countElements(formulaString); i++ {
+            var tempCharacter = formulaString[advance(formulaString.startIndex, i)]
+            switch tempCharacter {
+                case "(", ")", "+", "×", "÷":
                     if temp != "" {
                         originStack += [temp]
                     }
-                    originStack += [String(character)]
+                    originStack += [String(tempCharacter)]
                     temp = ""
+                case "-":
+                    if formulaString[advance(formulaString.startIndex, i-1)] == "×" || formulaString[advance(formulaString.startIndex, i-1)] == "÷" {
+                        temp += String(tempCharacter)
+                    }
+                    else {
+                        if temp != "" {
+                            originStack += [temp]
+                        }
+                        originStack += [String(tempCharacter)]
+                        temp = ""
+                    }
                 default:
-                    temp += String(character)
+                    temp += String(tempCharacter)
             }
         }
         // 将最好存在temp中的串置入originStack中
@@ -211,5 +223,18 @@ class FormulaCalculation {
         }
         
         return answerString
+    }
+    
+    // 判断算式中是否存在数字，若无任一数字出现，则直接返回false且提示Error结束计算
+    func isNumberExisted(formulaString: String) -> Bool {
+        for character in formulaString {
+            switch character {
+                case "1", "2", "3", "4", "5", "6", "7", "8", "9", "0":
+                    return true
+                default: continue
+            }
+        }
+        
+        return false
     }
 }

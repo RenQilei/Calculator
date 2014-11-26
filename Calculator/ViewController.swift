@@ -5,6 +5,8 @@
 //  Created by 任琦磊 on 14/10/24.
 //  Copyright (c) 2014年 任琦磊. All rights reserved.
 //
+//  Bundle identifier: com.renqilei.$(PRODUCT_NAME:rfc1034identifier)
+//  Bundle name: $(PRODUCT_NAME)
 
 import UIKit
 
@@ -12,7 +14,7 @@ class ViewController: UIViewController {
     
     var formulaString = ""
     var isCalculated = false // 标记是否完成一次计算，用于Clear按钮的判断
-    var tempAnswerStore = "" // 临时存储计算结果，如果下一次计算为运算符则使用，否则忽略
+    var tempAnswerStore = "" // 临时存储上一次的计算结果，如果下一次计算为运算符则使用，否则忽略
     
     @IBOutlet var formulaLabel: UILabel!
     @IBOutlet var answerLabel: UILabel!
@@ -21,14 +23,22 @@ class ViewController: UIViewController {
         isCalculated = false
         
         // 处理高位多个"0"的情况
+        var currentTitle = sender.currentTitle!
         
-        formulaString += sender.currentTitle!
+        if LastCharacter(formulaString) == "0" && !isRealNumber(formulaString) {
+            formulaString = formulaString.substringToIndex(advance(formulaString.startIndex, countElements(formulaString)-1)) + currentTitle
+        }
+        else {
+            formulaString += currentTitle
+        }
         formulaLabel.text = formulaString
     }
     
     @IBAction func ClickOperatorButton(sender: UIButton) {
         isCalculated = false
         
+        // 如果此时键入算式为空，则使用上一次的计算结果
+        // 当上一次计算结果为负时，则自动在结果前添加0
         if formulaString.isEmpty && !tempAnswerStore.isEmpty {
             if tempAnswerStore[advance(tempAnswerStore.startIndex, 0)] == "-" {
                 formulaString = "0" + tempAnswerStore
@@ -133,6 +143,7 @@ class ViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
+    // 判断当前键入操作符是否正确，并返回最终的formulaString
     func CorrectOperator(currentFormulaString: String, currentOperator: String) -> String {
         if countElements(currentFormulaString)  == 0 {
             // formulaString为空，则仅允许输入'+'、'-'
@@ -141,12 +152,25 @@ class ViewController: UIViewController {
             }
         }
         else {
-            // formulaString中的最后一个字符，若'('则只允许输入'+'、'-'，若'+'、'-'、'*'、'/'则拒绝输入
+            // formulaString中的最后一个字符，若'('则只允许输入'+'、'-'
+            // 若最后字符是‘+’、‘-’，且目前输入字符是‘-’，则符号取反
+            // 若最后字符是‘*’、“/”，且目前输入字符是‘-’，则允许输入 ==> 后果，在最后要做优化，补全'('、')'和‘0’
+            // 若最后字符是操作符，且目前输入是‘+’，则拒绝输入
+            // 首次字符输入，则允许输入
             let lastCharacter = LastCharacter(currentFormulaString)
             if (lastCharacter == "(") && (currentOperator == "+" || currentOperator == "-") {
                     return currentFormulaString + "0" + currentOperator
             }
-            else if lastCharacter == "+" || lastCharacter == "-" || lastCharacter == "×" || lastCharacter == "÷" {
+            else if lastCharacter == "+" && currentOperator == "-" {
+                return currentFormulaString.substringToIndex(currentFormulaString.endIndex.predecessor()) + "-"
+            }
+            else if lastCharacter == "-" && currentOperator == "-" {
+                return currentFormulaString.substringToIndex(currentFormulaString.endIndex.predecessor()) + "+"
+            }
+            else if (lastCharacter == "×" || lastCharacter == "÷") && currentOperator == "-" {
+                return currentFormulaString + "-"
+            }
+            else if (lastCharacter == "+" || lastCharacter == "-" || lastCharacter == "×" || lastCharacter == "÷") && currentOperator == "+" {
                 return currentFormulaString
             }
         }
@@ -168,7 +192,7 @@ class ViewController: UIViewController {
                     return currentFormulaString
                 }
                 else {
-                    switch lastCharacter {
+                    switch lastCharacter! {
                         case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
                             return currentFormulaString + "."
                         default:
@@ -197,7 +221,7 @@ class ViewController: UIViewController {
                 }
                 else {
                     if character == "(" {
-                        switch LastCharacter(correctFormulaString) {
+                        switch LastCharacter(correctFormulaString)! {
                             case "0", "1", "2", "3", "4", "5", "6", "7", "8", "9":
                                 correctFormulaString = correctFormulaString + "×" + String(character)
                             default:
@@ -257,15 +281,36 @@ class ViewController: UIViewController {
             }
         }
         if leftBracket > rightBracket {
-            correctFormulaString = correctFormulaString + ")"
+            for var i=leftBracket-rightBracket; i>0; i-- {
+                correctFormulaString += ")"
+            }
         }
         
         return correctFormulaString
     }
     
-    //获得当前formulaString的最后一个字符
-    func LastCharacter(currentFormulaString: String) -> Character {
-        return currentFormulaString[advance(currentFormulaString.startIndex, countElements(currentFormulaString)-1)]
+    // 获得当前formulaString的最后一个字符
+    func LastCharacter(currentFormulaString: String) -> Character? {
+        if !currentFormulaString.isEmpty {
+            return currentFormulaString[advance(currentFormulaString.startIndex, countElements(currentFormulaString)-1)]
+        }
+        else {
+            return nil
+        }
+    }
+    
+    func isRealNumber(currentFormulaString: String) -> Bool {
+        for var i = countElements(currentFormulaString)-1; i>=0; i-- {
+            switch currentFormulaString[advance(currentFormulaString.startIndex, i)] {
+                case ".", "1", "2", "3", "4", "5", "6", "7", "8", "9":
+                    return true
+                case "+", "-", "×", "÷":
+                    return false
+                default: continue
+            }
+        }
+        
+        return false
     }
     
     func HasDemical(currentFormulaString: String) -> Bool {
